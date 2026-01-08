@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: auth-service
+    name: member-service
   datasource:
     url: jdbc:postgresql://localhost:5432/c0f
     username: c0f
