@@ -8,13 +8,5 @@ spring:
     url: jdbc:postgresql://localhost:5432/c0f
     username: c0f
     password: c0f
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    open-in-view: false
-    properties:
-      hibernate:
-        default_schema: member
 jwt:
   secret: my-super-secret-key-minimum-32-bytes!!!
