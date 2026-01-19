@@ -32,29 +32,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-
-            if (!jwtUtil.isTokenValid(token)) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-
-            Claims claims = jwtUtil.parseToken(token);
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            claims.getSubject(),
-                            null,
-                            Collections.emptyList()
-                    );
-
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
-
-            filterChain.doFilter(request, response);
+        if (header == null || !header.startsWith("Bearer ")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
+        String token = header.substring(7);
+
+        if (!jwtUtil.isTokenValid(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        Claims claims = jwtUtil.parseToken(token);
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        claims.getSubject(),
+                        null,
+                        Collections.emptyList()
+                );
+
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
+
         filterChain.doFilter(request, response);
+
     }
 }

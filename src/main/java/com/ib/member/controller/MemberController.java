@@ -1,7 +1,6 @@
 package com.ib.member.controller;
 
 import com.ib.member.dto.MemberDto;
-import com.ib.member.repository.MemberRepository;
 import com.ib.member.service.MemberService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
