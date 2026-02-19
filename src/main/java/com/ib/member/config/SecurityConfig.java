@@ -1,5 +1,6 @@
-package com.ib.member.security;
+package com.ib.member.config;
 
+import com.ib.member.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
