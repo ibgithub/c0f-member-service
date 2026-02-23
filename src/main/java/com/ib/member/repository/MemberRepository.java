@@ -23,8 +23,8 @@ public class MemberRepository {
                 place_of_birth, date_of_birth,
                 phone_number, email, address,
                 city, province, country,
-                created_by, created_date,
-                updated_by, updated_date
+                created_by, created_at,
+                updated_by, updated_at
             FROM member.members
         """;
 
@@ -53,9 +53,9 @@ public class MemberRepository {
             m.setCountry(rs.getString("country"));
 
             m.setCreatedBy(rs.getString("created_by"));
-            m.setCreatedDate(rs.getTimestamp("created_date").toLocalDateTime());
-            if (rs.getTimestamp("updated_date") != null) {
-                m.setUpdatedDate(rs.getTimestamp("updated_date").toLocalDateTime());
+            m.setCreatedDate(rs.getTimestamp("created_at").toLocalDateTime());
+            if (rs.getTimestamp("updated_at") != null) {
+                m.setUpdatedDate(rs.getTimestamp("updated_at").toLocalDateTime());
             }
             m.setUpdatedBy(rs.getString("updated_by"));
             return m;
