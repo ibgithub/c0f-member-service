@@ -1,0 +1,41 @@
+name: development deployment
+
+on:
+  pull_request:
+    branches:
+      - 'development'
+    types:
+      - 'closed'
+  push:
+    branches:
+      - 'development'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: setup node
+        uses: graalvm/setup-graalvm@v1.4
+        with:
+          java-version: '21'
+          distribution: 'graalvm-community'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: set commit id
+        id: commit-id
+        run: echo "image-tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+      - name: compile binary
+        run: |
+          sed -i -e 's|SNAPSHOT|${{ steps.commit-id.outputs.image-tag }}|' pom.xml
+          ./mvnw clean package -DskipTests
+      - name: upload via scp
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSHKEY }}" > ~/.ssh/id_ed25519
+          chmod 0600 ~/.ssh/id_ed25519
+          scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ${{ vars.DEV_SSH_PORT }} member-service-0.0.1-${{ steps.commit-id.outputs.image-tag }}.jar deploy@${{ vars.DEV_SSH_HOST }}:jars/
+          ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${{ vars.DEV_SSH_PORT }} deploy@${{ vars.DEV_SSH_HOST }} docker restart member-service-dev
