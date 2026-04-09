@@ -6,14 +6,11 @@ on:
       - 'development'
     types:
       - 'closed'
-  push:
-    branches:
-      - 'development'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
-    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -37,5 +34,5 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_SSHKEY }}" > ~/.ssh/id_ed25519
           chmod 0600 ~/.ssh/id_ed25519
-          scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ${{ vars.DEV_SSH_PORT }} target/*.jar deploy@${{ vars.DEV_SSH_HOST }}:jars/
-          ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${{ vars.DEV_SSH_PORT }} deploy@${{ vars.DEV_SSH_HOST }} docker restart member-service-dev
+          scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ${{ vars.DEV_SSH_PORT }} target/member-service-0.0.1-${{ steps.commit-id.outputs.image-tag }}.jar deploy@${{ vars.DEV_SSH_HOST }}:deploy-jars/
+          ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${{ vars.DEV_SSH_PORT }} deploy@${{ vars.DEV_SSH_HOST }} bash -c "ln -sf member-service-0.0.1-${{ steps.commit-id.outputs.image-tag }}.jar deploy-jars/member-service.jar && docker restart c0f-member-service"
