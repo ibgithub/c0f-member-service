@@ -19,8 +19,8 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: setup node
-        uses: graalvm/setup-graalvm@v1.4
+      - name: setup graalvm
+        uses: graalvm/setup-graalvm@v1
         with:
           java-version: '21'
           distribution: 'graalvm-community'
@@ -30,12 +30,12 @@ jobs:
         run: echo "image-tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
       - name: compile binary
         run: |
-          sed -i -e 's|SNAPSHOT|${{ steps.commit-id.outputs.image-tag }}|' pom.xml
+          sed -i -e "s|SNAPSHOT|${{ steps.commit-id.outputs.image-tag }}|" pom.xml
           ./mvnw clean package -DskipTests
       - name: upload via scp
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_SSHKEY }}" > ~/.ssh/id_ed25519
           chmod 0600 ~/.ssh/id_ed25519
-          scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ${{ vars.DEV_SSH_PORT }} member-service-0.0.1-${{ steps.commit-id.outputs.image-tag }}.jar deploy@${{ vars.DEV_SSH_HOST }}:jars/
+          scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ${{ vars.DEV_SSH_PORT }} target/*.jar deploy@${{ vars.DEV_SSH_HOST }}:jars/
           ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${{ vars.DEV_SSH_PORT }} deploy@${{ vars.DEV_SSH_HOST }} docker restart member-service-dev
